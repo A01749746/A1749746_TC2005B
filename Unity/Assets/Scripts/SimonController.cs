@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class SimonController : MonoBehaviour
 {
@@ -22,8 +23,17 @@ public class SimonController : MonoBehaviour
     private List<int> sequence = new List<int>();
     private int posicion = 0;
     private bool juego = false;
-    private float timeSinceLastButton = 0f;
+    private float tiempo = 0f;
     private int botonEnSecuencia = 0;
+
+    public Button powerUp1;
+    public Button powerUp2;
+
+    private bool powerUp1Usado = false;
+    private bool powerUp2Usado = false;
+
+    public TMP_Text mensaje;
+
 
 
 
@@ -48,7 +58,14 @@ public class SimonController : MonoBehaviour
         botonNegro.onClick.AddListener(() => botonPresionado(5));
         botonMorado.onClick.AddListener(() => botonPresionado(6));
 
+        powerUp1.onClick.AddListener(volverVerSecuencia);
+        powerUp2.onClick.AddListener(saltarNivel);
+
+        mensaje.gameObject.SetActive(false);
+
         anadirPaso();
+
+
     }
 
 
@@ -56,11 +73,11 @@ public class SimonController : MonoBehaviour
     {
         if (juego){
             
-            timeSinceLastButton += Time.deltaTime;
+            tiempo += Time.deltaTime;
 
-            if (timeSinceLastButton >= 0.5f){
+            if (tiempo >= 0.5f){
 
-                timeSinceLastButton = 0f;
+                tiempo = 0f;
                 PlaySequence();
             }
         }
@@ -69,13 +86,11 @@ public class SimonController : MonoBehaviour
     void PlaySequence()
     {
         if (botonEnSecuencia < sequence.Count){
-
             int info = sequence[botonEnSecuencia];
             GlowButton(GetButtonImage(info), Color.white); 
             botonEnSecuencia++;
         }
         else{
-
             juego = false;
             botonEnSecuencia = 0;
             posicion = 0;
@@ -110,10 +125,13 @@ public class SimonController : MonoBehaviour
             if (posicion >= sequence.Count)
             {
                 anadirPaso();
+                MostrarMensaje("Secuencia Completada :)");
+
             }
         }
         else if (!juego){
-            
+                MostrarMensaje("Game Over :(");
+
         }
     }
 
@@ -134,11 +152,50 @@ public class SimonController : MonoBehaviour
         sequence.Clear();
         posicion = 0;
         juego = false;
-        timeSinceLastButton = 0f;
+        tiempo = 0f;
         botonEnSecuencia = 0;
+        powerUp1Usado = false;
+        powerUp2Usado = false;
         StartGame();
+        
 
     }
+
+    public void volverVerSecuencia()
+    {
+        if (!powerUp1Usado)
+        {
+            powerUp1Usado = true; 
+            juego = true;
+            botonEnSecuencia = 0;
+            posicion = 0;
+        }
+    }
+
+    public void saltarNivel()
+    {
+        if (!powerUp2Usado)
+        {
+            powerUp2Usado = true;
+            anadirPaso(); 
+            juego = true; 
+        }
+    }
+
+    void MostrarMensaje(string msg)
+    {
+        mensaje.text = msg;
+        mensaje.gameObject.SetActive(true);
+        StartCoroutine(tiempoMensaje(1));
+    }
+
+    IEnumerator tiempoMensaje(float seg)
+    {
+        yield return new WaitForSeconds(seg);
+        mensaje.text = "";
+        mensaje.gameObject.SetActive(false);
+    }
+
 
 
 }
