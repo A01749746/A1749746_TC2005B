@@ -36,13 +36,13 @@ app.get('/api/api_basics_tcg/:id', (req, resp) => {
 app.post('/api/api_basics_tcg', (req, resp) => {
     const nuevaCarta = req.body;
     if (!nuevaCarta.nombre || !nuevaCarta.attack || !nuevaCarta.effect) {
-        resp.status(404).send({ mensaje: 'La carta debe tener un nombre' });
+        resp.status(404).send('La carta debe tener un nombre');
     }
     //Despues se le pueden agregar valores de power, health, etc
 
     const existe = cartas.findIndex(carta => carta.id === nuevaCarta.id);
     if (existe !== -1) {
-        resp.status(404).send({ mensaje: 'La carta ya existe' });
+        resp.status(404).send('La carta ya existe');
     }else{
         nuevaCarta.id = id;
         cartas.push(nuevaCarta);
