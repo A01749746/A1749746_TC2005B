@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
+
 
 public class SimonController : MonoBehaviour
 {
@@ -34,11 +36,18 @@ public class SimonController : MonoBehaviour
 
     public TMP_Text mensaje;
 
+    public int highScore = 0;
+    public int score = 0;
+
+    public TMP_Text highScoreText;
+    public TMP_Text scoreText;
+
 
 
 
     void Start()
     {
+        highScore = 0;
         StartGame();
     }
 
@@ -62,6 +71,8 @@ public class SimonController : MonoBehaviour
         powerUp2.onClick.AddListener(saltarNivel);
 
         mensaje.gameObject.SetActive(false);
+
+        textos();
 
         anadirPaso();
 
@@ -87,7 +98,7 @@ public class SimonController : MonoBehaviour
     {
         if (botonEnSecuencia < sequence.Count){
             int info = sequence[botonEnSecuencia];
-            GlowButton(GetButtonImage(info), Color.white); 
+            GlowButton(obtenerImagen(info), Color.white); 
             botonEnSecuencia++;
         }
         else{
@@ -101,9 +112,19 @@ public class SimonController : MonoBehaviour
     {
         sequence.Add(Random.Range(1, 7));
         juego = true;
+
+        if(score > highScore){
+            highScore = score;
+        }
+
+        textos();
+
+        score = score +1;
+
+
     }
 
-    Image GetButtonImage(int boton)
+    Image obtenerImagen(int boton)
     {
         switch (boton){
 
@@ -120,24 +141,20 @@ public class SimonController : MonoBehaviour
     void botonPresionado(int boton)
     {
         if (!juego && sequence[posicion] == boton){
-
             posicion++;
             if (posicion >= sequence.Count)
             {
                 anadirPaso();
-                MostrarMensaje("Secuencia Completada :)");
-
+                MostrarMensaje("Secuencia Completada :)",1);
             }
-        }
-        else if (!juego){
-                MostrarMensaje("Game Over :(");
-
+        }else if (!juego){
+                MostrarMensaje("Game Over :(", 2);
         }
     }
 
     void GlowButton(Image imagen, Color glowColor)
     {
-        StartCoroutine(colorOriginal(imagen, imagen.color, glowColor, 0.5f));
+        StartCoroutine(colorOriginal(imagen, imagen.color, glowColor, 0.3f));
     }
 
     IEnumerator colorOriginal(Image imagen, Color originalColor, Color glowColor, float delay)
@@ -156,6 +173,7 @@ public class SimonController : MonoBehaviour
         botonEnSecuencia = 0;
         powerUp1Usado = false;
         powerUp2Usado = false;
+        score = 0;
         StartGame();
         
 
@@ -182,11 +200,11 @@ public class SimonController : MonoBehaviour
         }
     }
 
-    void MostrarMensaje(string msg)
+    void MostrarMensaje(string msg, float time)
     {
         mensaje.text = msg;
         mensaje.gameObject.SetActive(true);
-        StartCoroutine(tiempoMensaje(1));
+        StartCoroutine(tiempoMensaje(time));
     }
 
     IEnumerator tiempoMensaje(float seg)
@@ -195,6 +213,18 @@ public class SimonController : MonoBehaviour
         mensaje.text = "";
         mensaje.gameObject.SetActive(false);
     }
+
+    public void mainMenu()
+    {
+        SceneManager.LoadScene("Menu");
+    }
+
+    void textos()
+    {
+        scoreText.text = "Score: " + score.ToString();
+        highScoreText.text = "High Score: " + highScore.ToString();
+    }
+
 
 
 
