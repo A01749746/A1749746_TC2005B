@@ -8,19 +8,8 @@ using UnityEngine.SceneManagement;
 
 public class SimonController : MonoBehaviour
 {
-    public Button botonRojo;
-    public Button botonVerde;
-    public Button botonAzul;
-    public Button botonNaranja;
-    public Button botonNegro;
-    public Button botonMorado;
-
-    private Image boton1Imagen;
-    private Image boton2Imagen;
-    private Image boton3Imagen;
-    private Image boton4Imagen;
-    private Image boton5Imagen;
-    private Image boton6Imagen;
+    public List<Button> botones = new List<Button>();
+    private List<Image> imagenesBotones = new List<Image>();
 
     private List<int> sequence = new List<int>();
     private int posicion = 0;
@@ -42,8 +31,8 @@ public class SimonController : MonoBehaviour
     public TMP_Text highScoreText;
     public TMP_Text scoreText;
 
-
-
+    AudioSource audioSource;
+    AudioSource audioSource2;
 
     void Start()
     {
@@ -53,19 +42,20 @@ public class SimonController : MonoBehaviour
 
     void StartGame()
     {
-        boton1Imagen = botonRojo.GetComponent<Image>();
-        boton2Imagen = botonVerde.GetComponent<Image>();
-        boton3Imagen = botonAzul.GetComponent<Image>();
-        boton4Imagen = botonNaranja.GetComponent<Image>();
-        boton5Imagen = botonNegro.GetComponent<Image>();
-        boton6Imagen = botonMorado.GetComponent<Image>();
+        foreach (Button boton in botones){
+            imagenesBotones.Add(boton.GetComponent<Image>());
+        }
 
-        botonRojo.onClick.AddListener(() => botonPresionado(1));
-        botonVerde.onClick.AddListener(() => botonPresionado(2));
-        botonAzul.onClick.AddListener(() => botonPresionado(3));
-        botonNaranja.onClick.AddListener(() => botonPresionado(4));
-        botonNegro.onClick.AddListener(() => botonPresionado(5));
-        botonMorado.onClick.AddListener(() => botonPresionado(6));
+        AudioSource[] audioSources = GetComponents<AudioSource>();
+        audioSource = audioSources[0];
+        audioSource2 = audioSources[1];
+
+
+
+        for (int i = 0; i < botones.Count; i++){
+            int x = i;
+            botones[i].onClick.AddListener(() => botonPresionado(x + 1));
+        }
 
         powerUp1.onClick.AddListener(volverVerSecuencia);
         powerUp2.onClick.AddListener(saltarNivel);
@@ -75,19 +65,15 @@ public class SimonController : MonoBehaviour
         textos();
 
         anadirPaso();
-
-
     }
+
 
 
     void Update()
     {
         if (juego){
-            
             tiempo += Time.deltaTime;
-
             if (tiempo >= 0.5f){
-
                 tiempo = 0f;
                 PlaySequence();
             }
@@ -98,7 +84,8 @@ public class SimonController : MonoBehaviour
     {
         if (botonEnSecuencia < sequence.Count){
             int info = sequence[botonEnSecuencia];
-            GlowButton(obtenerImagen(info), Color.white); 
+            GlowButton(obtenerImagen(info), Color.white);
+            audioSource.Play(); 
             botonEnSecuencia++;
         }
         else{
@@ -116,39 +103,28 @@ public class SimonController : MonoBehaviour
         if(score > highScore){
             highScore = score;
         }
-
         textos();
-
         score = score +1;
-
-
     }
 
+    
     Image obtenerImagen(int boton)
     {
-        switch (boton){
-
-            case 1: return boton1Imagen;
-            case 2: return boton2Imagen;
-            case 3: return boton3Imagen;
-            case 4: return boton4Imagen;
-            case 5: return boton5Imagen;
-            case 6: return boton6Imagen;
-            default: return null;
-        }
+        return imagenesBotones[boton - 1];
     }
 
     void botonPresionado(int boton)
     {
         if (!juego && sequence[posicion] == boton){
             posicion++;
-            if (posicion >= sequence.Count)
-            {
+            if (posicion >= sequence.Count){
                 anadirPaso();
                 MostrarMensaje("Secuencia Completada :)",1);
             }
         }else if (!juego){
                 MostrarMensaje("Game Over :(", 2);
+                audioSource2.Play(); 
+
         }
     }
 
