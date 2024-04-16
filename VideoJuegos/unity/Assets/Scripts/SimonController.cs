@@ -40,6 +40,7 @@ public class SimonController : MonoBehaviour
 
     AudioSource audioSource;
     AudioSource audioSource2;
+    AudioSource audioSource3;
 
     void Start()
     {
@@ -57,12 +58,16 @@ public class SimonController : MonoBehaviour
         AudioSource[] audioSources = GetComponents<AudioSource>();
         audioSource = audioSources[0];
         audioSource2 = audioSources[1];
+        audioSource3 = audioSources[2];
 
         for (int i = 0; i < botones.Count; i++){
             int x = i;
             botones[i].onClick.RemoveAllListeners();
             botones[i].onClick.AddListener(() => botonPresionado(x + 1));
         }
+
+        powerUp1.GetComponent<Image>().color = Color.green;
+        powerUp2.GetComponent<Image>().color = Color.green;
 
         powerUp1.onClick.RemoveAllListeners();
         powerUp1.onClick.AddListener(volverVerSecuencia);
@@ -124,6 +129,7 @@ public class SimonController : MonoBehaviour
         }
         if (sequence[posicion] == boton){
             posicion++;
+            audioSource3.Play();
             if (posicion >= sequence.Count){
                 anadirPaso();
                 MostrarMensaje("Secuencia Completada :)", 1);
@@ -187,6 +193,8 @@ public class SimonController : MonoBehaviour
             juego = true;
             botonEnSecuencia = 0;
             posicion = 0;
+            powerUp1.GetComponent<Image>().color = Color.red;
+
         }
     }
 
@@ -197,6 +205,7 @@ public class SimonController : MonoBehaviour
             powerUp2Usado = true;
             anadirPaso(); 
             juego = true; 
+            powerUp2.GetComponent<Image>().color = Color.red;
         }
     }
 
