@@ -1,10 +1,17 @@
+/*
+Script for all the logic and creation of the Simon game
+Including game logic, sounds, images, mesages and scores
+
+Alberto Limón
+2024-02-21
+*/
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
-
 
 public class SimonController : MonoBehaviour
 {
@@ -42,6 +49,7 @@ public class SimonController : MonoBehaviour
 
     void StartGame()
     {
+        imagenesBotones.Clear();
         foreach (Button boton in botones){
             imagenesBotones.Add(boton.GetComponent<Image>());
         }
@@ -50,24 +58,21 @@ public class SimonController : MonoBehaviour
         audioSource = audioSources[0];
         audioSource2 = audioSources[1];
 
-
-
         for (int i = 0; i < botones.Count; i++){
             int x = i;
+            botones[i].onClick.RemoveAllListeners();
             botones[i].onClick.AddListener(() => botonPresionado(x + 1));
         }
 
+        powerUp1.onClick.RemoveAllListeners();
         powerUp1.onClick.AddListener(volverVerSecuencia);
+        powerUp2.onClick.RemoveAllListeners();
         powerUp2.onClick.AddListener(saltarNivel);
 
         mensaje.gameObject.SetActive(false);
-
         textos();
-
         anadirPaso();
     }
-
-
 
     void Update()
     {
@@ -97,16 +102,15 @@ public class SimonController : MonoBehaviour
 
     void anadirPaso()
     {
-        sequence.Add(Random.Range(1, 7));
+        sequence.Add(Random.Range(1, botones.Count + 1));
         juego = true;
 
         if(score > highScore){
             highScore = score;
         }
         textos();
-        score = score +1;
+        score++;
     }
-
     
     Image obtenerImagen(int boton)
     {
@@ -115,16 +119,19 @@ public class SimonController : MonoBehaviour
 
     void botonPresionado(int boton)
     {
-        if (!juego && sequence[posicion] == boton){
+        if (juego){
+            return;
+        }
+        if (sequence[posicion] == boton){
             posicion++;
             if (posicion >= sequence.Count){
                 anadirPaso();
-                MostrarMensaje("Secuencia Completada :)",1);
+                MostrarMensaje("Secuencia Completada :)", 1);
             }
-        }else if (!juego){
-                MostrarMensaje("Game Over :(", 2);
-                audioSource2.Play(); 
-
+        }else{
+            MostrarMensaje("Game Over :(", 2);
+            audioSource2.Play();
+            juego = false;
         }
     }
 
@@ -140,8 +147,8 @@ public class SimonController : MonoBehaviour
         imagen.color = originalColor;
     }
 
-    public void Reset(){
-
+    public void Reset()
+    {
         sequence.Clear();
         posicion = 0;
         juego = false;
@@ -151,8 +158,25 @@ public class SimonController : MonoBehaviour
         powerUp2Usado = false;
         score = 0;
         StartGame();
-        
+    }
 
+    void MostrarMensaje(string msg, float time)
+    {
+        mensaje.text = msg;
+        mensaje.gameObject.SetActive(true);
+        StartCoroutine(tiempoMensaje(time));
+    }
+
+    IEnumerator tiempoMensaje(float seg)
+    {
+        yield return new WaitForSeconds(seg);
+        mensaje.gameObject.SetActive(false);
+    }
+
+    void textos()
+    {
+        scoreText.text = "Score: " + score;
+        highScoreText.text = "High Score: " + highScore;
     }
 
     public void volverVerSecuencia()
@@ -176,29 +200,10 @@ public class SimonController : MonoBehaviour
         }
     }
 
-    void MostrarMensaje(string msg, float time)
-    {
-        mensaje.text = msg;
-        mensaje.gameObject.SetActive(true);
-        StartCoroutine(tiempoMensaje(time));
-    }
-
-    IEnumerator tiempoMensaje(float seg)
-    {
-        yield return new WaitForSeconds(seg);
-        mensaje.text = "";
-        mensaje.gameObject.SetActive(false);
-    }
 
     public void mainMenu()
     {
         SceneManager.LoadScene("Menu");
-    }
-
-    void textos()
-    {
-        scoreText.text = "Score: " + score.ToString();
-        highScoreText.text = "High Score: " + highScore.ToString();
     }
 
 

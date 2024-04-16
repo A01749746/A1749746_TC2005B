@@ -1,3 +1,9 @@
+/*
+Script to manage the pong score
+
+Alberto Limón
+2024-02-21
+*/
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
